@@ -1,0 +1,191 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editar Linhas de Texto</title>
+<style>
+  body {
+    background-color: black;
+    color: white;
+    font-family: Arial, sans-serif;
+  }
+  h1 {
+    color: cyan;
+    text-align: center;
+    padding: 20px;
+  }
+  textarea {
+    width: 100%;
+    height: 200px;
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px;
+    margin-bottom: 10px;
+    resize: none;
+  }
+  button {
+    background-color: #03e9f4;
+    color: black;
+    border: none;
+    padding: 10px 20px;
+    margin-top: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  button:hover {
+    background-color: #0391c9;
+  }
+  .output-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .line {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .char-count {
+    color: Cyan;
+    font-weight: bold;
+  }
+  .read-only-input {
+    background-color: #333;
+    color: Lime;
+    border: none;
+    padding: 5px;
+    flex: 1;
+  }
+  .editable-input {
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 5px;
+    flex: 2;
+  }
+</style>
+</head>
+<body>
+    <h1>CONTADOR/EDITOR DE TEXTO PARA TRADUZIR JOGOS</h1>
+    <p>- 1º copie um texto e cole na caixa, em seguida clique em processar texto.</p>
+   <p>
+  <b style="color: white;">- TEXTOS:  | Cor Branca = Não editado</b> |
+  <b style="color: magenta;">Cor Magenta = Falta completar os bytes</b> |
+  <b style="color: green;">Cor Verde = Texto pronto!</b>
+</p>
+    <p>- Revise o texto se está completo, antes de passar para a proxima linha!.</p>
+    <p>- Para salvar, clique em "Salvar texto" e será gerado um novo arquivo em .txt.</p>
+    <p>- Desenvolvido por LOBO NINTENDISTA!</p>
+
+    <textarea id="textArea" placeholder="Cole seu texto aqui nesta caixa"></textarea>
+
+    <!-- Div para agrupar os botões -->
+    <div class="button-container">
+        <button onclick="confirmProcess()">Processar Texto</button>
+        <button onclick="saveText()">Salvar um novo arquivo</button>
+        <button onclick="confirmRestart()">REINICIAR PROGRAMA!!!</button>
+    </div>
+
+    <div class="output-container" id="output"></div>
+
+
+<script>
+       let modifiedLines = [];
+
+        function processText() {
+            const textArea = document.getElementById('textArea');
+            const outputDiv = document.getElementById('output');
+            const lines = textArea.value.split('\n');
+
+            modifiedLines = [];
+
+            outputDiv.innerHTML = '';
+
+            lines.forEach((line, index) => {
+                if (line.trim() !== '') {
+                    const lineDiv = document.createElement('div');
+                    lineDiv.className = 'line';
+
+                    // Número da linha
+                    const lineNumSpan = document.createElement('span');
+                    lineNumSpan.className = 'line-number';
+                    lineNumSpan.textContent = index + 1;
+
+                    const charCountSpan = document.createElement('span');
+                    charCountSpan.className = 'char-count';
+                    charCountSpan.textContent = line.length;
+
+                    const readOnlyInput = document.createElement('input');
+                    readOnlyInput.type = 'text';
+                    readOnlyInput.className = 'read-only-input';
+                    readOnlyInput.value = line;
+                    readOnlyInput.readOnly = true;
+
+                    const editableInput = document.createElement('input');
+                    editableInput.type = 'text';
+                    editableInput.className = 'editable-input';
+                    editableInput.value = line;
+                    editableInput.addEventListener('input', (event) => {
+                        const originalLine = lines[index];
+                        const currentLine = event.target.value;
+
+                        // Verifica se a quantidade de caracteres digitados excede o comprimento original
+                        if (currentLine.length > originalLine.length) {
+                            event.target.value = currentLine.slice(0, originalLine.length);
+                        }
+
+                        modifiedLines[index] = event.target.value;
+
+                        const charCount = event.target.value.length;
+
+                        const color = charCount > originalLine.length
+                            ? 'red'
+                            : charCount < originalLine.length
+                            ? 'magenta'
+                            : 'lime';
+
+                        event.target.style.color = color;
+                        charCountSpan.textContent = charCount;
+                    });
+
+                    lineDiv.appendChild(lineNumSpan);
+                    lineDiv.appendChild(readOnlyInput);
+                    lineDiv.appendChild(editableInput);
+                    lineDiv.appendChild(charCountSpan); // Move char count element to the end
+
+                    outputDiv.appendChild(lineDiv);
+
+                    modifiedLines[index] = line;
+                }
+            });
+        }
+
+        function saveText() {
+            const textToSave = modifiedLines.filter(Boolean).join('\n');
+            const blob = new Blob([textToSave], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'Novo_arquivo.txt';
+            a.click();
+        }
+
+        function confirmRestart() {
+            const confirmation = window.confirm('Tem certeza de que deseja reiniciar o programa? Todos os dados não salvos serão perdidos.');
+            if (confirmation) {
+                const textArea = document.getElementById('textArea');
+                textArea.value = '';
+                processText(); // Chama a função para atualizar a exibição
+            }
+        }
+		function confirmProcess() {
+            const confirmation = window.confirm('Deseja processar o texto?');
+            if (confirmation) {
+                processText(); // Chama a função de processamento de texto se o usuário confirmar
+            }
+        }
+    </script>
+</body>
+</html>
